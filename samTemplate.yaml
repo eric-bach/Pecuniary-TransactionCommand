@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Pecuniary Transaction Command services
+
+Parameters:
+  AppName:
+    Description: Application name
+    Type: String
+    Default: Pecuniary
+  PecuniaryStackParameter:
+    Type: String
+    Default: pecuniary-stack
+
+Mappings:
+  Constants:
+    Application: 
+      Name: Pecuniary
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  PecuniaryWebApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: 
+                Fn::Sub:
+                    - arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}
+                    - UserPoolId:
+                        Fn::ImportValue:
+                          !Sub ${PecuniaryStackParameter}-PecuniaryCognitoUserPoolId
+            Identity:
+              Header: Authorization
+      Tags:
+        AppName: !FindInMap [Constants, Application, Name]
+
+  TransactionCommandWebApi:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: pecuniary-TransactionCommand
+      Handler: Pecuniary.Transaction.Command::Pecuniary.Transaction.Command.LambdaEntryPoint::FunctionHandlerAsync
+      Runtime: dotnetcore2.1
+      CodeUri: Pecuniary.Transaction.Command/bin/Debug/netcoreapp2.1/publish
+      MemorySize: 384
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:ListTables
+              - dynamodb:DescribeTable
+              - dynamodb:GetItem
+              - dynamodb:GetRecords
+              - dynamodb:Query
+              - dynamodb:Scan
+              - dynamodb:CreateTable
+              - dynamodb:DeleteItem
+              - dynamodb:DeleteTable
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+              - dynamodb:UpdateTable
+            Resource:
+              - Fn::ImportValue:
+                  !Sub ${PecuniaryStackParameter}-PecuniaryDynamoDbEventStoreArn
+      Environment:
+        Variables:
+          EventStoreTableName:
+            Fn::ImportValue:
+              !Sub ${PecuniaryStackParameter}-PecuniaryDynamoDbEventStore
+      Events:
+        CreateTransaction:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PecuniaryWebApi
+            Path: /api/transaction
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+      Tags:
+        AppName: !Ref AppName
+
+Outputs:
+  PecuniaryApiGatewayBaseUrl:
+    Description: Base Url of the Pecuniary API Gateway
+    Value: !Ref PecuniaryWebApi
+    Export:
+      Name: !Sub ${AWS::StackName}-PecuniaryApiGatewayBaseUrl
