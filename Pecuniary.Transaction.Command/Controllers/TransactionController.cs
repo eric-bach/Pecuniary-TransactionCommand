@@ -26,7 +26,9 @@ namespace Pecuniary.Transaction.Command.Controllers
             Logger.Log($"Received {nameof(TransactionViewModel)}");
 
             var id = Guid.NewGuid();
-            
+
+            Logger.Log($"Created new Transaction Id: {id}");
+
             try
             {
                 _mediator.Send(new CreateTransactionCommand(id, vm));

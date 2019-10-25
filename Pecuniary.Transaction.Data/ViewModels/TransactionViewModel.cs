@@ -14,7 +14,6 @@ namespace Pecuniary.Transaction.Data.ViewModels
 
     public class SecurityViewModel
     {
-        [JsonProperty("Id")]
         public Guid SecurityId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }

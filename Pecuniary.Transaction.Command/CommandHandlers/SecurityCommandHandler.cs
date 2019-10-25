@@ -5,6 +5,7 @@ using EricBach.CQRS.EventRepository;
 using EricBach.LambdaLogger;
 using MediatR;
 using Pecuniary.Transaction.Data.Commands;
+using Pecuniary.Transaction.Data.ViewModels;
 using _Security = Pecuniary.Transaction.Data.Models.Security;
 
 namespace Pecuniary.Transaction.Command.CommandHandlers
@@ -27,12 +28,33 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
 
+            Logger.Log($"Initializing new {nameof(_Security)} aggregate {command.Id}");
+
             var aggregate = new _Security(command.Id, command.Security);
+
+            Logger.Log($"Saving new {nameof(_Security)} aggregate {command.Id}");
 
             // Save to Event Store
             _securityRepository.Save(aggregate, aggregate.Version);
 
-            Logger.Log($"Completed saving {nameof(_Security)} aggregate to event store");
+            Logger.Log($"Completed saving {nameof(_Security)} aggregate {command.Id} to event store");
+
+            // TODO CreateTransactionCommand()
+            Logger.Log($"Creating Transaction {command.TransactionId}");
+            var transaction = new TransactionViewModel
+            {
+                AccountId = command.AccountId,
+                Security = new SecurityViewModel
+                {
+                    SecurityId = command.Id,
+                    Name = command.Security.Name,
+                    Description = command.Security.Description,
+                    ExchangeTypeCode = command.Security.ExchangeTypeCode
+                }
+            };
+            _mediator.Send(new CreateTransactionCommand(command.TransactionId, transaction), CancellationToken.None);
+            
+            Logger.Log($"Successfully created Transaction {command.TransactionId}");
 
             return Task.FromResult(cancellationToken);
         }

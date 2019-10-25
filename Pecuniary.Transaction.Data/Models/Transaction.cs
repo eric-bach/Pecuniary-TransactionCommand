@@ -11,7 +11,7 @@ namespace Pecuniary.Transaction.Data.Models
     public class Transaction : AggregateRoot, IEventHandler<TransactionCreatedEvent>, ISnapshot
     {
         public Guid AccountId { get; set; }
-        public Security Security { get; set; }
+        //public SecurityViewModel Security { get; set; }
 
         public Transaction()
         {
@@ -22,7 +22,13 @@ namespace Pecuniary.Transaction.Data.Models
             var transactionViewModel = new TransactionViewModel
             {
                 AccountId = vm.AccountId,
-                Security = vm.Security
+                Security = new SecurityViewModel
+                {
+                    SecurityId = vm.Security.SecurityId,
+                    Name = vm.Security.Name,
+                    Description = vm.Security.Description,
+                    ExchangeTypeCode = vm.Security.ExchangeTypeCode
+                }
             };
 
             ApplyChange(new TransactionCreatedEvent(id, transactionViewModel));
@@ -32,9 +38,9 @@ namespace Pecuniary.Transaction.Data.Models
         {
             Id = e.Id;
             AccountId = e.Transaction.AccountId;
-            Security.Name = e.Transaction.Security.Name;
-            Security.Description = e.Transaction.Security.Description;
-            Security.ExchangeTypeCode = e.Transaction.Security.ExchangeTypeCode;
+            //Security.Name = e.Transaction.Security.Name;
+            //Security.Description = e.Transaction.Security.Description;
+            //Security.ExchangeTypeCode = e.Transaction.Security.ExchangeTypeCode;
 
             Version = e.Version;
         }

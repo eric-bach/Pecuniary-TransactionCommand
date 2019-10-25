@@ -9,8 +9,10 @@ namespace Pecuniary.Transaction.Data.Commands
     public class CreateSecurityCommand : Command, IRequest<CancellationToken>
     {
         public SecurityViewModel Security { get; set; }
+        public Guid AccountId { get; set; }
+        public Guid TransactionId { get; set; }
 
-        public CreateSecurityCommand(Guid id, SecurityViewModel security) : base(id)
+        public CreateSecurityCommand(Guid id, SecurityViewModel security, Guid accountId, Guid transactionId) : base(id)
         {
             if (string.IsNullOrEmpty(security.Name))
                 throw new Exception($"{nameof(security.Name)} is required");
@@ -20,6 +22,8 @@ namespace Pecuniary.Transaction.Data.Commands
                 throw new Exception($"{nameof(security.ExchangeTypeCode)} is invalid.  Must be one of [TSX, NYSE, NASDAQ]");
 
             Security = security;
+            TransactionId = transactionId;
+            AccountId = accountId;
         }
     }
 }
