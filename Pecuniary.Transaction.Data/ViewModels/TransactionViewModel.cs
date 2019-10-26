@@ -11,13 +11,4 @@ namespace Pecuniary.Transaction.Data.ViewModels
         public Guid AccountId { get; set; }
         public SecurityViewModel Security { get; set; }
     }
-
-    public class SecurityViewModel
-    {
-        public Guid SecurityId { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string ExchangeTypeCode { get; set; }
-    }
-
 }
