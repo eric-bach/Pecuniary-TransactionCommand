@@ -22,13 +22,7 @@ namespace Pecuniary.Transaction.Data.Models
             var transactionViewModel = new TransactionViewModel
             {
                 AccountId = vm.AccountId,
-                Security = new SecurityViewModel
-                {
-                    SecurityId = vm.Security.SecurityId,
-                    Name = vm.Security.Name,
-                    Description = vm.Security.Description,
-                    ExchangeTypeCode = vm.Security.ExchangeTypeCode
-                }
+                Security = vm.Security
             };
 
             ApplyChange(new TransactionCreatedEvent(id, transactionViewModel));

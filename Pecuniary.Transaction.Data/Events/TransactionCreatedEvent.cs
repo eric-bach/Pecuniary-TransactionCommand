@@ -18,13 +18,7 @@ namespace Pecuniary.Transaction.Data.Events
             EventName = nameof(TransactionCreatedEvent);
 
             Transaction.AccountId = transaction.AccountId;
-            Transaction.Security = new SecurityViewModel
-            {
-                SecurityId = transaction.Security.SecurityId,
-                Name = transaction.Security.Name,
-                Description = transaction.Security.Description,
-                ExchangeTypeCode = transaction.Security.ExchangeTypeCode
-            };
+            Transaction.Security = transaction.Security;
         }
     }
 }
