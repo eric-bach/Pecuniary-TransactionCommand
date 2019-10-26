@@ -31,6 +31,7 @@ namespace Pecuniary.Transaction.Data.Models
             AccountId = e.Transaction.AccountId;
 
             Version = e.Version;
+            EventVersion = e.Version;
         }
     }
 }

@@ -37,6 +37,7 @@ namespace Pecuniary.Transaction.Data.Models
             ExchangeTypeCode = e.Security.ExchangeTypeCode;
             
             Version = e.Version;
+            EventVersion = e.EventVersion;
         }
     }
 }
