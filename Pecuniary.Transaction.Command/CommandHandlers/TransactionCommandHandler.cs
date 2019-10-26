@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using EricBach.CQRS.EventRepository;
 using EricBach.LambdaLogger;
 using MediatR;
-using Newtonsoft.Json;
 using Pecuniary.Transaction.Data.Commands;
+using Pecuniary.Transaction.Data.ViewModels;
 using _Transaction = Pecuniary.Transaction.Data.Models.Transaction;
 using _Security = Pecuniary.Transaction.Data.Models.Security;
 
@@ -31,16 +31,18 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
 
+            // Check if the Security exists
             var securityId = command.Transaction.Security.SecurityId;
             var securityAggregate = securityId != Guid.Empty ? _securityRepository.GetById(securityId) : null;
-            if (securityAggregate == null)
+
+            if (securityAggregate == null || !IsSameSecurity(securityAggregate, command.Transaction.Security))
             {
-                // CreateSecurityCommand
                 Logger.Log($"Security {command.Transaction.Security.Name} does not exist. Creating...");
-                
-                // TODO How to pass Transaction Guid in? Or use DynamoDB to trigger another command
+
+                // Issue a CreateSecurityCommand if Security does not exist
                 securityId = Guid.NewGuid();
-                _mediator.Send(new CreateSecurityCommand(securityId, command.Transaction.Security, command.Transaction.AccountId, Guid.NewGuid()), CancellationToken.None);
+                _mediator.Send(new CreateSecurityCommand(securityId, command.Transaction.Security, command.Transaction.AccountId,
+                        command.Id), CancellationToken.None);
                 
                 Logger.Log($"Successfully created Security {securityId}");
             }
@@ -48,7 +50,7 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
             {
                 Logger.Log($"Initializing new {nameof(_Transaction)} aggregate {command.Id}");
 
-                // CreateTransactionCommand
+                // Issue a CreateTransactionCommand if Security exists
                 var transactionAggregate = new _Transaction(command.Id, command.Transaction);
 
                 Logger.Log($"Saving new {nameof(_Transaction)} aggregate {command.Id}");
@@ -60,6 +62,12 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
             }
 
             return Task.FromResult(cancellationToken);
+        }
+
+        private static bool IsSameSecurity(_Security security, SecurityViewModel vm)
+        {
+            return security.Name == vm.Name && security.Description == vm.Description &&
+                   security.ExchangeTypeCode == vm.ExchangeTypeCode;
         }
     }
 }

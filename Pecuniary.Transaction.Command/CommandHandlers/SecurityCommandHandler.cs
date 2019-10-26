@@ -39,7 +39,7 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
 
             Logger.Log($"Completed saving {nameof(_Security)} aggregate {command.Id} to event store");
 
-            // TODO CreateTransactionCommand()
+            // Issue a CreateTransactionCommand to create the Transaction
             Logger.Log($"Creating Transaction {command.TransactionId}");
             var transaction = new TransactionViewModel
             {
