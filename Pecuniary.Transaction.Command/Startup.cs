@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using EricBach.CQRS.EventRepository;
-using EricBach.CQRS.EventStore;
+using EricBach.CQRS.EventRepository.EventStore;
 using EricBach.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -63,6 +63,7 @@ namespace Pecuniary.Transaction.Command
             // Command Service
             services.AddScoped<IEventRepository<Data.Models.Transaction>, EventRepository<Data.Models.Transaction>>();
             services.AddScoped<IEventRepository<Data.Models.Security>, EventRepository<Data.Models.Security>>();
+            services.AddScoped<IEventRepository<Data.Models.Account>, EventRepository<Data.Models.Account>>();
             //services.AddScoped<AccountSnapshot, AccountSnapshot>();
         }
     }
