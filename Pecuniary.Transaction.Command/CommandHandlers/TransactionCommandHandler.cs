@@ -35,22 +35,21 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
             var securityId = command.Transaction.Security.SecurityId;
             var securityAggregate = securityId != Guid.Empty ? _securityRepository.GetById(securityId) : null;
 
+            // Issue a CreateSecurityCommand if Security does not exist
             if (securityAggregate == null || !IsSameSecurity(securityAggregate, command.Transaction.Security))
             {
                 Logger.Log($"Security {command.Transaction.Security.Name} does not exist. Creating...");
 
-                // Issue a CreateSecurityCommand if Security does not exist
                 securityId = Guid.NewGuid();
-                _mediator.Send(new CreateSecurityCommand(securityId, command.Transaction.Security, command.Transaction.AccountId,
-                        command.Id), CancellationToken.None);
+                _mediator.Send(new CreateSecurityCommand(securityId, command.Id, command.Transaction), CancellationToken.None);
                 
                 Logger.Log($"Successfully created Security {securityId}");
             }
+            // Issue a CreateTransactionCommand if Security exists
             else
             {
                 Logger.Log($"Initializing new {nameof(_Transaction)} aggregate {command.Id}");
 
-                // Issue a CreateTransactionCommand if Security exists
                 var transactionAggregate = new _Transaction(command.Id, command.Transaction);
 
                 Logger.Log($"Saving new {nameof(_Transaction)} aggregate {command.Id}");

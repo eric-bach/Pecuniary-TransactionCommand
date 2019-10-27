@@ -30,7 +30,7 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
 
             Logger.Log($"Initializing new {nameof(_Security)} aggregate {command.Id}");
 
-            var aggregate = new _Security(command.Id, command.Security);
+            var aggregate = new _Security(command.Id, command.Transaction.Security);
 
             Logger.Log($"Saving new {nameof(_Security)} aggregate {command.Id}");
 
@@ -41,17 +41,9 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
 
             // Issue a CreateTransactionCommand to create the Transaction
             Logger.Log($"Creating Transaction {command.TransactionId}");
-            var transaction = new TransactionViewModel
-            {
-                AccountId = command.AccountId,
-                Security = new SecurityViewModel
-                {
-                    SecurityId = command.Id,
-                    Name = command.Security.Name,
-                    Description = command.Security.Description,
-                    ExchangeTypeCode = command.Security.ExchangeTypeCode
-                }
-            };
+            var transaction = command.Transaction;
+            // Update the Security Id now that a Security has been created
+            transaction.Security.SecurityId = command.Id;
             _mediator.Send(new CreateTransactionCommand(command.TransactionId, transaction), CancellationToken.None);
             
             Logger.Log($"Successfully created Transaction {command.TransactionId}");
