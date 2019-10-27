@@ -10,5 +10,8 @@ namespace Pecuniary.Transaction.Data.ViewModels
     {
         public Guid AccountId { get; set; }
         public SecurityViewModel Security { get; set; }
+        public decimal Shares { get; set; }
+        public decimal Price { get; set; }
+        public decimal Commission { get; set; }
     }
 }

@@ -16,20 +16,14 @@ namespace Pecuniary.Transaction.Data.Models
 
         public Transaction(Guid id, TransactionViewModel vm)
         {
-            var transactionViewModel = new TransactionViewModel
-            {
-                AccountId = vm.AccountId,
-                Security = vm.Security
-            };
-
-            ApplyChange(new TransactionCreatedEvent(id, transactionViewModel));
+            ApplyChange(new TransactionCreatedEvent(id, vm));
         }
 
         public void Handle(TransactionCreatedEvent e)
         {
             Id = e.Id;
             AccountId = e.Transaction.AccountId;
-
+            
             Version = e.Version;
             EventVersion = e.Version;
         }

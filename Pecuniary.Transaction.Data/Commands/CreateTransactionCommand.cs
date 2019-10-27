@@ -14,6 +14,8 @@ namespace Pecuniary.Transaction.Data.Commands
         {
             if (transaction.AccountId == Guid.Empty)
                 throw new Exception($"{nameof(transaction.AccountId)} is required");
+            if (transaction.Price < 0)
+                throw new Exception($"{nameof(transaction.Price)} must be greater than $0.00");
 
             Transaction = transaction;
         }
