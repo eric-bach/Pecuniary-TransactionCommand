@@ -5,7 +5,7 @@
     <AWSProjectType>Lambda</AWSProjectType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EricBach.CQRS.EventRepository" Version="1.0.9" />
+    <PackageReference Include="EricBach.CQRS.EventRepository" Version="1.0.10" />
     <PackageReference Include="EricBach.DependencyInjection" Version="1.0.1" />
     <PackageReference Include="EricBach.LambdaLogger" Version="1.0.0" />
     <PackageReference Include="MediatR" Version="6.0.0" />
