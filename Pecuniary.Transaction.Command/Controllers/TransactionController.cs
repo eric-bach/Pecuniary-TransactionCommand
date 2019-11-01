@@ -15,12 +15,10 @@ namespace Pecuniary.Transaction.Command.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IEventRepository<Account> AccountRepository;
 
-        public TransactionController(IMediator mediator, IEventRepository<Account> accountRepository)
+        public TransactionController(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-            AccountRepository = accountRepository ?? throw new InvalidOperationException($"{nameof(Account)}Repository is not initialized.");
         }
 
         // POST api/transaction
@@ -35,7 +33,7 @@ namespace Pecuniary.Transaction.Command.Controllers
 
             try
             {
-                _mediator.Send(new CreateTransactionCommand(id, AccountRepository, vm));
+                _mediator.Send(new CreateTransactionCommand(id, vm));
             }
             catch (Exception e)
             {
