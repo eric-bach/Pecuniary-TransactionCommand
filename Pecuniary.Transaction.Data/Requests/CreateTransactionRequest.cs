@@ -1,4 +1,5 @@
 ﻿using System;
+using EricBach.CQRS.Requests;
 
 namespace Pecuniary.Transaction.Data.Requests
 {
