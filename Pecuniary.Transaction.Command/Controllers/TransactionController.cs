@@ -21,7 +21,7 @@ namespace Pecuniary.Transaction.Command.Controllers
 
         // POST api/transaction
         [HttpPost]
-        public ActionResult<CommandResponse> Post([FromBody] CreateTransactionRequest vm)
+        public ActionResult<CommandResponse> Post([FromBody] CreateTransactionRequest request)
         {
             Logger.Log($"Received {nameof(CreateTransactionRequest)}");
 
@@ -29,7 +29,7 @@ namespace Pecuniary.Transaction.Command.Controllers
 
             try
             {
-                _mediator.Send(new CreateTransactionCommand(id, vm));
+                _mediator.Send(new CreateTransactionCommand(id, request));
             }
             catch (Exception e)
             {
