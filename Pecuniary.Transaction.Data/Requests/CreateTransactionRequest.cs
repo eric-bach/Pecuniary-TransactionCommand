@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Threading;
-using MediatR;
 
 namespace Pecuniary.Transaction.Data.Requests
 {
-    public class CreateTransactionRequest : Request, IRequest<CancellationToken>
+    public class CreateTransactionRequest : Request
     {
         public Guid AccountId { get; set; }
         public CreateSecurityRequest Security { get; set; }
@@ -12,13 +10,8 @@ namespace Pecuniary.Transaction.Data.Requests
         public decimal Price { get; set; }
         public decimal Commission { get; set; }
 
-        public CreateTransactionRequest(Guid id, Guid accountId, CreateSecurityRequest security, decimal shares, decimal price, decimal commission) : base(id)
+        public CreateTransactionRequest(Guid id) : base(id)
         {
-            AccountId = accountId;
-            Security = security;
-            Shares = shares;
-            Price = price;
-            Commission = commission;
         }
     }
 

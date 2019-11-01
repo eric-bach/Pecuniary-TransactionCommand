@@ -1,8 +1,8 @@
 ﻿using System;
 using EricBach.CQRS.Aggregate;
 using EricBach.CQRS.EventHandlers;
-using Pecuniary.Transaction.Data.Commands;
 using Pecuniary.Transaction.Data.Events;
+using Pecuniary.Transaction.Data.Requests;
 
 namespace Pecuniary.Transaction.Data.Models
 {
@@ -14,7 +14,7 @@ namespace Pecuniary.Transaction.Data.Models
         {
         }
 
-        public Transaction(Guid id, CreateTransaction vm)
+        public Transaction(Guid id, CreateTransactionRequest vm)
         {
             ApplyChange(new TransactionCreatedEvent(id, vm));
         }

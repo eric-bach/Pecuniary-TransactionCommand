@@ -3,6 +3,7 @@ using EricBach.CQRS.Commands;
 using EricBach.LambdaLogger;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Pecuniary.Transaction.Data.Commands;
 using Pecuniary.Transaction.Data.Requests;
 
 namespace Pecuniary.Transaction.Command.Controllers
@@ -28,7 +29,7 @@ namespace Pecuniary.Transaction.Command.Controllers
 
             try
             {
-                _mediator.Send(new CreateTransactionRequest(id, vm.AccountId, vm.Security, vm.Shares, vm.Price, vm.Commission));
+                _mediator.Send(new CreateTransactionCommand(id, vm));
             }
             catch (Exception e)
             {
@@ -37,7 +38,7 @@ namespace Pecuniary.Transaction.Command.Controllers
 
             Logger.Log($"Completed processing {nameof(CreateTransactionRequest)}");
 
-            return Ok(new CommandResponse {Id = id, Name = nameof(CreateTransactionRequest) });
+            return Ok(new CommandResponse {Id = id, Name = nameof(CreateTransactionCommand) });
         }
     }
 }

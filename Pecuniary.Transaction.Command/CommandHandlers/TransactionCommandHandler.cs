@@ -11,12 +11,10 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
 {
     public class TransactionCommandHandlers : IRequestHandler<CreateTransactionCommand, CancellationToken>
     {
-        private readonly IMediator _mediator;
         private readonly IEventRepository<_Transaction> _eventRepository;
 
-        public TransactionCommandHandlers(IMediator mediator, IEventRepository<_Transaction> eventRepository)
+        public TransactionCommandHandlers(IEventRepository<_Transaction> eventRepository)
         {
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _eventRepository = eventRepository ?? throw new InvalidOperationException($"{nameof(_Transaction)}Repository is not initialized.");
         }
 
@@ -26,6 +24,15 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
 
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
+
+            if (command.Transaction.Price < 0)
+                throw new Exception($"{nameof(command.Transaction.Price)} must be greater than $0.00");
+
+            if (command.Transaction.AccountId == Guid.Empty)
+                throw new Exception($"{nameof(command.Transaction.AccountId)} is required");
+
+            if (command.Transaction.Security.SecurityId == Guid.Empty)
+                throw new Exception($"{nameof(command.Transaction.Security.SecurityId)} is required");
 
             // Validate that the Account exists
             if (!_eventRepository.VerifyAggregateExists(command.Transaction.AccountId))
