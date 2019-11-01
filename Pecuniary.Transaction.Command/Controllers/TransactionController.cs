@@ -1,12 +1,9 @@
 ﻿using System;
 using EricBach.CQRS.Commands;
-using EricBach.CQRS.EventRepository;
 using EricBach.LambdaLogger;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Pecuniary.Transaction.Data.Commands;
-using Pecuniary.Transaction.Data.Models;
-using Pecuniary.Transaction.Data.ViewModels;
+using Pecuniary.Transaction.Data.Requests;
 
 namespace Pecuniary.Transaction.Command.Controllers
 {
@@ -23,26 +20,24 @@ namespace Pecuniary.Transaction.Command.Controllers
 
         // POST api/transaction
         [HttpPost]
-        public ActionResult<CommandResponse> Post([FromBody] TransactionViewModel vm)
+        public ActionResult<CommandResponse> Post([FromBody] CreateTransactionRequest vm)
         {
-            Logger.Log($"Received {nameof(TransactionViewModel)}");
+            Logger.Log($"Received {nameof(CreateTransactionRequest)}");
 
             var id = Guid.NewGuid();
 
-            Logger.Log($"Created new Transaction Id: {id}");
-
             try
             {
-                _mediator.Send(new CreateTransactionCommand(id, vm));
+                _mediator.Send(new CreateTransactionRequest(id, vm.AccountId, vm.Security, vm.Shares, vm.Price, vm.Commission));
             }
             catch (Exception e)
             {
                 return BadRequest(new CommandResponse { Error = e.Message });
             }
 
-            Logger.Log($"Completed processing {nameof(CreateTransactionCommand)}");
+            Logger.Log($"Completed processing {nameof(CreateTransactionRequest)}");
 
-            return Ok(new CommandResponse {Id = id, Name = nameof(CreateTransactionCommand) });
+            return Ok(new CommandResponse {Id = id, Name = nameof(CreateTransactionRequest) });
         }
     }
 }

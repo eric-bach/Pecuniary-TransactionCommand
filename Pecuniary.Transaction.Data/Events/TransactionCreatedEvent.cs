@@ -1,6 +1,7 @@
 ﻿using System;
 using EricBach.CQRS.Events;
-using Pecuniary.Transaction.Data.ViewModels;
+using Pecuniary.Transaction.Data.Commands;
+using Pecuniary.Transaction.Data.Requests;
 
 namespace Pecuniary.Transaction.Data.Events
 {
@@ -8,13 +9,13 @@ namespace Pecuniary.Transaction.Data.Events
     {
         private const int _eventVersion = 1;
         
-        public TransactionViewModel Transaction { get; internal set; } = new TransactionViewModel();
+        public CreateTransaction Transaction { get; internal set; }
 
         public TransactionCreatedEvent() : base(nameof(TransactionCreatedEvent), _eventVersion)
         {
         }
 
-        public TransactionCreatedEvent(Guid id, TransactionViewModel transaction) : base(nameof(TransactionCreatedEvent), _eventVersion)
+        public TransactionCreatedEvent(Guid id, CreateTransaction transaction) : base(nameof(TransactionCreatedEvent), _eventVersion)
         {
             Id = id;
             EventName = nameof(TransactionCreatedEvent);

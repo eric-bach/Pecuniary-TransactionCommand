@@ -27,19 +27,10 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
 
-            if (command.Transaction.Price < 0)
-                throw new Exception($"{nameof(command.Transaction.Price)} must be greater than $0.00");
-
-            if (command.Transaction.AccountId == Guid.Empty)
-                throw new Exception($"{nameof(command.Transaction.AccountId)} is required");
-
             // Validate that the Account exists
             if (!_eventRepository.VerifyAggregateExists(command.Transaction.AccountId))
                 throw new Exception($"{nameof(command.Transaction.AccountId)} {command.Transaction.AccountId} does not exist");
  
-            if (command.Transaction.Security.SecurityId == Guid.Empty)
-                throw new Exception($"{nameof(command.Transaction.Security.SecurityId)} is required");
-
             // validate that the Security exists
             if (!_eventRepository.VerifyAggregateExists(command.Transaction.Security.SecurityId))
                 throw new Exception($"{nameof(command.Transaction.Security)} with Id {command.Transaction.Security.SecurityId} does not exist");
