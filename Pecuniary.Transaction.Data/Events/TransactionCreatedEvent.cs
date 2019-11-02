@@ -10,10 +10,6 @@ namespace Pecuniary.Transaction.Data.Events
         
         public CreateTransactionRequest Transaction { get; internal set; }
 
-        public TransactionCreatedEvent() : base(nameof(TransactionCreatedEvent), _eventVersion)
-        {
-        }
-
         public TransactionCreatedEvent(Guid id, CreateTransactionRequest transaction) : base(nameof(TransactionCreatedEvent), _eventVersion)
         {
             Id = id;
