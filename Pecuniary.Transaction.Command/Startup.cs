@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using EricBach.CQRS.EventRepository;
 using EricBach.CQRS.EventRepository.EventStore;
 using EricBach.DependencyInjection;
@@ -58,7 +59,7 @@ namespace Pecuniary.Transaction.Command
 
             // Event Sourcing - toggle between InMemory and DynamoDB event stores
             //services.AddScoped<IEventStore, InMemoryEventStore>();
-            services.AddScoped<IEventStore, DynamoDbEventStore>();
+            services.AddScoped<IEventStore>(e => new DynamoDbEventStore(Environment.GetEnvironmentVariable("EventStoreTableName")));
 
             // Command Service
             services.AddScoped<IEventRepository<Data.Models.Transaction>, EventRepository<Data.Models.Transaction>>();
