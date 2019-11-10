@@ -7,9 +7,12 @@ Parameters:
     Description: Application name
     Type: String
     Default: Pecuniary
-  PecuniaryStackParameter:
+  PecuniaryAuthStackParameter:
     Type: String
-    Default: pecuniary-stack
+    Default: pecuniary-auth-stack
+  PecuniaryDbStackParameter:
+    Type: String
+    Default: pecuniary-db-stack
 
 Mappings:
   Constants:
@@ -35,7 +38,7 @@ Resources:
                     - arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}
                     - UserPoolId:
                         Fn::ImportValue:
-                          !Sub ${PecuniaryStackParameter}-PecuniaryCognitoUserPoolId
+                          !Sub ${PecuniaryAuthStackParameter}-PecuniaryCognitoUserPoolId
             Identity:
               Header: Authorization
       Tags:
@@ -67,12 +70,12 @@ Resources:
               - dynamodb:UpdateTable
             Resource:
               - Fn::ImportValue:
-                  !Sub ${PecuniaryStackParameter}-PecuniaryDynamoDbEventStoreArn
+                  !Sub ${PecuniaryDbStackParameter}-PecuniaryDynamoDbEventStoreArn
       Environment:
         Variables:
           EventStoreTableName:
             Fn::ImportValue:
-              !Sub ${PecuniaryStackParameter}-PecuniaryDynamoDbEventStore
+              !Sub ${PecuniaryDbStackParameter}-PecuniaryDynamoDbEventStore
       Events:
         CreateTransaction:
           Type: Api
@@ -87,7 +90,7 @@ Resources:
 
 Outputs:
   PecuniaryApiGatewayBaseUrl:
-    Description: Base Url of the Pecuniary API Gateway
+    Description: Base Url of the Pecuniary Transaction Command API Gateway
     Value: !Ref PecuniaryWebApi
     Export:
       Name: !Sub ${AWS::StackName}-PecuniaryApiGatewayBaseUrl
