@@ -1,34 +1,72 @@
-version: '1.0.{build}'
-image: Visual Studio 2019
+# General configuration
+
+version: 1.0.{build}
+
 branches:
   only:
-  - master
+    - master
+
+skip_tags: true
+
+# Environment configuration
+
+image: Visual Studio 2019
+
 init:
-  # Good practise, because Windows line endings are different from Unix/Linux ones
-  - cmd: git config --global core.autocrlf true
-install:
-  # Install repo specific stuff here
-before_build:
-  # Display .NET Core version
-  - cmd: dotnet --version
-  # Display minimal restore text
-  - cmd: dotnet restore --verbosity m
-build_script:
-  # output will be in ./src/bin/debug/netcoreapp1.1/publish
-  - cmd: dotnet publish
-after_build:
-  # For once the build has completed
-artifacts:
- - path: '\Pecuniary.Transaction.Command\bin\Debug\netcoreapp2.1\publish'
-   name: artifact
-   type: zip
+  - git config --global core.autocrlf true
+
 clone_depth: 1
-# test_script:
-#   # restore packages for our unit tests
-#   - cmd: dotnet restore ./tests/tests.csproj --verbosity m
-#   # run the unit tests (requires changing into the test directory)
-#   - cmd: cd tests
-#   - cmd: dotnet xunit
-on_finish :
-  # any cleanup in here
-deploy: off
+
+environment:
+  AWS_ACCESS_CLIENT_ID: 
+    secure: 7mjagrvKpawI4d3QxIUa6fXlvxQm6C3d3DMI7S2WGlY=
+  AWS_SECRET_ACCESS_KEY:
+    secure: EPjzIETUdn275EWUFFOADjM3De/DpJ1gdVINaJa2by4XHeXkOTrqwHtl60FG+SF4
+  AWS_REGION: us-west-2    
+
+# Build configuration
+
+configuration: Release
+
+before_build:
+  - dotnet --version
+  - dotnet restore --verbosity m
+  - nuget restore
+
+build_script:
+  - dotnet publish
+
+after_build:
+  - choco install opencover.portable
+  - choco install codecov
+
+# Tests configuration
+
+test_script:
+  - OpenCover.Console.exe
+    -target:"C:\Program Files\dotnet\dotnet.exe"
+    -targetargs:"test"
+    -output:coverage.xml
+    -oldStyle
+    -filter:"+[Pecuniary.Transaction.Command*]* -[Pecuniary.Transaction.Tests*]*"
+    -register:user
+    -returntargetcode
+  - codecov -f "coverage.xml"
+
+# Artifacts configuration
+
+artifacts:
+  - path: \Pecuniary.Transaction.Command\bin\Release\netcoreapp2.1\publish
+    name: artifact
+    type: zip
+
+# Deployment configuration
+
+deploy_script:
+  - ps: Write-Host "Installing AWS extensions for dotnet CLI..."
+  - cmd: dotnet tool install -g Amazon.Lambda.Tools
+  - cmd: aws configure set aws_access_key_id %AWS_ACCESS_CLIENT_ID%
+  - cmd: aws configure set aws_secret_access_key %AWS_SECRET_ACCESS_KEY%
+  - cmd: aws configure set region $AWS_REGION%
+  - ps: Write-Host "Execute deploy script..."
+  - ps: . .\deploy.ps1 -skipBuild
