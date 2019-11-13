@@ -10,7 +10,10 @@ namespace Pecuniary.Transaction.Data.Requests
         public decimal Price { get; set; }
         public decimal Commission { get; set; }
     }
+}
 
+namespace Pecuniary.Transaction.Data.Requests
+{
     public class CreateSecurityRequest
     {
         public Guid SecurityId { get; set; }
