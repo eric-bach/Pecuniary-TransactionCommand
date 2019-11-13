@@ -5,23 +5,17 @@ using EricBach.CQRS.EventRepository;
 using EricBach.LambdaLogger;
 using MediatR;
 using Pecuniary.Transaction.Data.Commands;
-using Pecuniary.Transaction.Data.ViewModels;
 using _Transaction = Pecuniary.Transaction.Data.Models.Transaction;
-using _Security = Pecuniary.Transaction.Data.Models.Security;
 
 namespace Pecuniary.Transaction.Command.CommandHandlers
 {
     public class TransactionCommandHandlers : IRequestHandler<CreateTransactionCommand, CancellationToken>
     {
-        private readonly IMediator _mediator;
-        private readonly IEventRepository<_Transaction> _transactionRepository;
-        private readonly IEventRepository<_Security> _securityRepository;
+        private readonly IEventRepository<_Transaction> _eventRepository;
 
-        public TransactionCommandHandlers(IMediator mediator, IEventRepository<_Transaction> transactionRepository, IEventRepository<_Security> securityRepository)
+        public TransactionCommandHandlers(IEventRepository<_Transaction> eventRepository)
         {
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-            _transactionRepository = transactionRepository ?? throw new InvalidOperationException($"{nameof(_Transaction)}Repository is not initialized.");
-            _securityRepository = securityRepository ?? throw new InvalidOperationException($"{nameof(_Security)}Repository is not initialized.");
+            _eventRepository = eventRepository ?? throw new InvalidOperationException($"{nameof(_Transaction)}Repository is not initialized.");
         }
 
         public Task<CancellationToken> Handle(CreateTransactionCommand command, CancellationToken cancellationToken)
@@ -31,42 +25,35 @@ namespace Pecuniary.Transaction.Command.CommandHandlers
             if (command == null)
                 throw new ArgumentNullException(nameof(command));
 
-            // Check if the Security exists
-            var securityId = command.Transaction.Security.SecurityId;
-            var securityAggregate = securityId != Guid.Empty ? _securityRepository.GetById(securityId) : null;
+            if (command.Transaction.Price < 0)
+                throw new Exception($"{nameof(command.Transaction.Price)} must be greater than $0.00");
 
-            // Issue a CreateSecurityCommand if Security does not exist
-            if (securityAggregate == null || !IsSameSecurity(securityAggregate, command.Transaction.Security))
-            {
-                Logger.Log($"Security {command.Transaction.Security.Name} does not exist. Creating...");
+            if (command.Transaction.AccountId == Guid.Empty)
+                throw new Exception($"{nameof(command.Transaction.AccountId)} is required");
 
-                securityId = Guid.NewGuid();
-                _mediator.Send(new CreateSecurityCommand(securityId, command.Id, command.Transaction), CancellationToken.None);
-                
-                Logger.Log($"Successfully created Security {securityId}");
-            }
-            // Issue a CreateTransactionCommand if Security exists
-            else
-            {
-                Logger.Log($"Initializing new {nameof(_Transaction)} aggregate {command.Id}");
+            if (command.Transaction.Security.SecurityId == Guid.Empty)
+                throw new Exception($"{nameof(command.Transaction.Security.SecurityId)} is required");
 
-                var transactionAggregate = new _Transaction(command.Id, command.Transaction);
+            // Validate that the Account exists
+            if (!_eventRepository.VerifyAggregateExists(command.Transaction.AccountId))
+                throw new Exception($"{nameof(command.Transaction.AccountId)} {command.Transaction.AccountId} does not exist");
+ 
+            // validate that the Security exists
+            if (!_eventRepository.VerifyAggregateExists(command.Transaction.Security.SecurityId))
+                throw new Exception($"{nameof(command.Transaction.Security)} with Id {command.Transaction.Security.SecurityId} does not exist");
+            
+            Logger.Log($"Initializing new {nameof(_Transaction)} aggregate {command.Id}");
 
-                Logger.Log($"Saving new {nameof(_Transaction)} aggregate {command.Id}");
+            var transactionAggregate = new _Transaction(command.Id, command.Transaction);
 
-                // Save to Event Store
-                _transactionRepository.Save(transactionAggregate, transactionAggregate.Version);
+            Logger.Log($"Saving new {nameof(_Transaction)} aggregate {command.Id}");
 
-                Logger.Log($"Completed saving {nameof(_Transaction)} aggregate {command.Id} to event store");
-            }
+            // Save to Event Store
+            _eventRepository.Save(transactionAggregate, transactionAggregate.Version);
+
+            Logger.Log($"Completed saving {nameof(_Transaction)} aggregate {command.Id} to event store");
 
             return Task.FromResult(cancellationToken);
-        }
-
-        private static bool IsSameSecurity(_Security security, SecurityViewModel vm)
-        {
-            return security.Name == vm.Name && security.Description == vm.Description &&
-                   security.ExchangeTypeCode == vm.ExchangeTypeCode;
         }
     }
 }

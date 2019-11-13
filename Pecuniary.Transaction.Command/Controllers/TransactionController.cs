@@ -1,12 +1,10 @@
 ﻿using System;
 using EricBach.CQRS.Commands;
-using EricBach.CQRS.EventRepository;
 using EricBach.LambdaLogger;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Pecuniary.Transaction.Data.Commands;
-using Pecuniary.Transaction.Data.Models;
-using Pecuniary.Transaction.Data.ViewModels;
+using Pecuniary.Transaction.Data.Requests;
 
 namespace Pecuniary.Transaction.Command.Controllers
 {
@@ -15,34 +13,30 @@ namespace Pecuniary.Transaction.Command.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private readonly IEventRepository<Account> AccountRepository;
 
-        public TransactionController(IMediator mediator, IEventRepository<Account> accountRepository)
+        public TransactionController(IMediator mediator)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-            AccountRepository = accountRepository ?? throw new InvalidOperationException($"{nameof(Account)}Repository is not initialized.");
         }
 
         // POST api/transaction
         [HttpPost]
-        public ActionResult<CommandResponse> Post([FromBody] TransactionViewModel vm)
+        public ActionResult<CommandResponse> Post([FromBody] CreateTransactionRequest request)
         {
-            Logger.Log($"Received {nameof(TransactionViewModel)}");
+            Logger.Log($"Received {nameof(CreateTransactionRequest)}");
 
             var id = Guid.NewGuid();
 
-            Logger.Log($"Created new Transaction Id: {id}");
-
             try
             {
-                _mediator.Send(new CreateTransactionCommand(id, AccountRepository, vm));
+                _mediator.Send(new CreateTransactionCommand(id, request));
             }
             catch (Exception e)
             {
                 return BadRequest(new CommandResponse { Error = e.Message });
             }
 
-            Logger.Log($"Completed processing {nameof(CreateTransactionCommand)}");
+            Logger.Log($"Completed processing {nameof(CreateTransactionRequest)}");
 
             return Ok(new CommandResponse {Id = id, Name = nameof(CreateTransactionCommand) });
         }

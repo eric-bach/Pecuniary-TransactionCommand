@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Pecuniary.Transaction.Data.ViewModels
+namespace Pecuniary.Transaction.Data.Requests
 {
-    public class SecurityViewModel
+    public class CreateSecurityRequest
     {
         public Guid SecurityId { get; set; }
         public string Name { get; set; }
