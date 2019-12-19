@@ -10,7 +10,7 @@
     <PackageReference Include="EricBach.LambdaLogger" Version="1.0.0" />
     <PackageReference Include="MediatR" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="3.1.0" />
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer" Version="4.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pecuniary.Transaction.Data\Pecuniary.Transaction.Data.csproj" />
